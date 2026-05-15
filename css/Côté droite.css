@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<head>
+<style>
+    <body>
+     {
+        font-family: Arial, sans-serif;
+        line-height: 1.5;
+        margin: 0;
+        padding: 20px;
+        max-width: 900px;
+    }
+
+    .content {
+        max-width: 600px;
+    }
+
+    .infobox {
+        position: relative;
+        top: 20px;
+        right: 20px;
+        width: 260px;
+        background: #f8f9fa;
+        border: 1px solid #a2a9b1;
+        border-collapse: collapse;
+        font-size: 14px;
+        z-index: 1000;
+    }
+
+    .infobox th {
+        background: #cedff2;
+        text-align: center;
+        font-size: 16px;
+        padding: 8px;
+        border-bottom: 1px solid #a2a9b1;
+    }
+
+    .infobox td {
+        padding: 6px;
+        border-top: 1px solid #a2a9b1;
+    }
+
+    .infobox img {
+        width: 100%;
+        display: block;
+        border-bottom: 1px solid #a2a9b1;
+    }
+    <body>
+</style>
+</head>
+</html>

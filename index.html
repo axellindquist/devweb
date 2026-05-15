@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<head>
+  <script>
+(function() {
+
+  const DB = {};
+  let ME = null;
+
+  const EMAIL_RE = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+  const VALID_TLDS = ['com','org','net','edu','gov','ca','fr','uk','de','io','co',
+    'us','eu','be','ch','au','nz','jp','br','mx','in','info','biz','me'];
+
+  function validFmt(e) { return EMAIL_RE.test(e); }
+  function validDomain(e) {
+    const d = (e.split('@')[1]||'').toLowerCase();
+    const tld = d.split('.').pop();
+    return VALID_TLDS.includes(tld) && d.includes('.') && tld.length >= 2;
+  }
+
+  function $id(i) { return document.getElementById(i); }
+  function setMsg(id, txt, type) {
+    const el = $id(id);
+    el.textContent = txt;
+    el.className = 'wh-msg' + (txt ? ' wh-show wh-'+type : '');
+  }
+  function setInp(id, state) {
+    const el = $id(id);
+    el.classList.remove('wh-err','wh-ok');
+    if (state) el.classList.add('wh-'+state);
+  }
+  function showAlert(alertId, txtId, msg) {
+    $id(alertId).className = 'wh-alert wh-err wh-show';
+    $id(txtId).textContent = msg;
+    const m = $id('wiki-modal');
+    m.classList.remove('wiki-shake');
+    void m.offsetWidth;
+    m.classList.add('wiki-shake');
+  }
+  function wClearAlert(id) { $id(id).className = 'wh-alert wh-err'; }
+
+  window.wikiOpen = function() {
+    if (ME) { showLoggedIn(); }
+    $id('wiki-overlay').classList.add('wiki-open');
+  };
+  window.wikiClose = function() { $id('wiki-overlay').classList.remove('wiki-open'); };
+  window.wikiOverlayClick = function(e) { if(e.target===$id('wiki-overlay')) wikiClose(); };
+
+  document.addEventListener('keydown', e => { if(e.key==='Escape') wikiClose(); });
+
+  window.wikiTab = function(t) {
+    $id('wiki-tab-reg').classList.toggle('wh-active', t==='reg');
+    $id('wiki-tab-log').classList.toggle('wh-active', t==='log');
+    $id('wiki-panel-reg').style.display = t==='reg' ? '' : 'none';
+    $id('wiki-panel-log').style.display = t==='log' ? '' : 'none';
+    $id('wiki-success').style.display = 'none';
+    $id('wiki-loggedin').style.display = 'none';
+    $id('wiki-tabs').style.display = '';
+    $id('wiki-modal-title').textContent = t==='reg' ? 'Rejoindre le site' : 'Se connecter';
+  };
+
+  window.wvEmailLive = function(iid, mid) {
+    const v = $id(iid).value.trim();
+    if (!v) { setMsg(mid,'',''); setInp(iid,null); return; }
+    if (!validFmt(v)) { setMsg(mid,'Format invalide – ex: nom@gmail.com','err'); setInp(iid,'err'); }
+    else if (!validDomain(v)) { setMsg(mid,'⚠ Domaine inconnu – vérifiez votre adresse','warn'); setInp(iid,'err'); }
+    else { setMsg(mid,'✔ Adresse valide','ok'); setInp(iid,'ok'); }
+  };
+  window.wvEmailBlur = function(iid, mid) {
+    wvEmailLive(iid, mid);
+    if (!$id(iid).value.trim()) { setMsg(mid,'Ce champ est requis.','err'); setInp(iid,'err'); }
+  };
+
+  window.wvEmailMatch = function() {
+    const a = $id('wr-email').value.trim(), b = $id('wr-email2').value.trim();
+    if (!b) { setMsg('wm-email2','',''); setInp('wr-email2',null); return; }
+    if (a!==b) { setMsg('wm-email2','Les courriels ne correspondent pas.','err'); setInp('wr-email2','err'); }
+    else { setMsg('wm-email2','✔ Courriels identiques','ok'); setInp('wr-email2','ok'); }
+  };
+
+  window.wvStrength = function() {
+    const pw = $id('wr-pw').value;
+    let s = 0;
+    if (pw.length >= 8) s++;
+    if (/[A-Z]/.test(pw)) s++;
+    if (/[0-9]/.test(pw)) s++;
+    if (/[^A-Za-z0-9]/.test(pw)) s++;
+    const levels = [
+      {w:'0%',bg:'#eee',txt:''},
+      {w:'25%',bg:'#d33',txt:'Très faible'},
+      {w:'50%',bg:'#e68a00',txt:'Moyen'},
+      {w:'75%',bg:'#3a7d44',txt:'Fort'},
+      {w:'100%',bg:'#14866d',txt:'Très fort'},
+    ];
+    const l = levels[s];
+    $id('wstr-fill').style.cssText = `width:${l.w};background:${l.bg}`;
+    const lbl = $id('wstr-lbl');
+    lbl.textContent = l.txt; lbl.style.color = l.bg;
+  };
+
+  window.wvPwMatch = function() {
+    const a = $id('wr-pw').value, b = $id('wr-pw2').value;
+    if (!b) { setMsg('wm-pw2','',''); setInp('wr-pw2',null); return; }
+    if (a!==b) { setMsg('wm-pw2','Les mots de passe ne correspondent pas.','err'); setInp('wr-pw2','err'); }
+    else { setMsg('wm-pw2','✔ Mots de passe identiques','ok'); setInp('wr-pw2','ok'); }
+  };
+
+  window.wSubmitReg = function() {
+    wClearAlert('wa-reg');
+    const em = $id('wr-email').value.trim();
+    const em2= $id('wr-email2').value.trim();
+    const pw = $id('wr-pw').value;
+    const pw2= $id('wr-pw2').value;
+
+    if (!em)           return showAlert('wa-reg','wa-reg-txt','Veuillez entrer votre adresse courriel.');
+    if (!validFmt(em)) return showAlert('wa-reg','wa-reg-txt','Adresse courriel invalide. Exemple : nom@gmail.com');
+    if (!validDomain(em)) return showAlert('wa-reg','wa-reg-txt','Ce domaine courriel n\'est pas reconnu.');
+    if (em !== em2)    return showAlert('wa-reg','wa-reg-txt','Les adresses courriel ne correspondent pas.');
+    if (pw.length < 8) return showAlert('wa-reg','wa-reg-txt','Mot de passe trop court (8 caractères minimum).');
+    if (pw !== pw2)    return showAlert('wa-reg','wa-reg-txt','Les mots de passe ne correspondent pas.');
+    if (DB[em])        return showAlert('wa-reg','wa-reg-txt','Ce courriel est déjà enregistré. Connectez-vous.');
+
+    DB[em] = { pw };
+
+    $id('wiki-panel-reg').style.display = 'none';
+    $id('wiki-tabs').style.display = 'none';
+    $id('wiki-success').style.display = 'block';
+    $id('wiki-modal-title').textContent = 'Inscription réussie !';
+  };
+
+  window.wSubmitLog = function() {
+    wClearAlert('wa-log');
+    const em = $id('wl-email').value.trim();
+    const pw = $id('wl-pw').value;
+
+    if (!em)            return showAlert('wa-log','wa-log-txt','Veuillez entrer votre adresse courriel.');
+    if (!validFmt(em))  return showAlert('wa-log','wa-log-txt','Format de courriel invalide.');
+    if (!pw)            return showAlert('wa-log','wa-log-txt','Veuillez entrer votre mot de passe.');
+    if (!DB[em])        return showAlert('wa-log','wa-log-txt','Aucun compte trouvé. Inscrivez-vous d\'abord.');
+    if (DB[em].pw !== pw) return showAlert('wa-log','wa-log-txt','Mot de passe incorrect. Réessayez.');
+
+    ME = em;
+    updateBtn();
+    showLoggedIn();
+  };
+
+  function showLoggedIn() {
+    $id('wiki-panel-reg').style.display = 'none';
+    $id('wiki-panel-log').style.display = 'none';
+    $id('wiki-success').style.display = 'none';
+    $id('wiki-tabs').style.display = 'none';
+    $id('wiki-loggedin').style.display = 'block';
+    $id('wk-avatar').textContent = ME.charAt(0).toUpperCase();
+    $id('wk-greet').textContent = 'Bonjour, ' + ME.split('@')[0] + ' !';
+    $id('wk-email').textContent = ME;
+    $id('wiki-modal-title').textContent = 'Mon compte';
+  }
+
+  window.wLogout = function() {
+    ME = null;
+    updateBtn();
+    wikiClose();
+    wikiTab('reg');
+    ['wr-email','wr-email2','wr-pw','wr-pw2','wl-email','wl-pw'].forEach(id => {
+      const el = $id(id); if(el){ el.value=''; el.className='wh-input'; }
+    });
+    ['wm-email','wm-email2','wm-pw2'].forEach(id => setMsg(id,'',''));
+    $id('wstr-fill').style.cssText = 'width:0%';
+    $id('wstr-lbl').textContent = '';
+  };
+
+  function updateBtn() {
+    $id('wiki-btn-txt').textContent = ME ? ME.split('@')[0] : 'Créer un compte';
+  }
+})();
+</script>
+  <script>
+  (function() {
+
+    const DB = {};
+    let ME = null;
+
+    const EMAIL_RE = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+    const VALID_TLDS = ['com','org','net','edu','gov','ca','fr','uk','de','io','co',
+      'us','eu','be','ch','au','nz','jp','br','mx','in','info','biz','me'];
+
+    function validFmt(e) { return EMAIL_RE.test(e); }
+    function validDomain(e) {
+      const d = (e.split('@')[1]||'').toLowerCase();
+      const tld = d.split('.').pop();
+      return VALID_TLDS.includes(tld) && d.includes('.') && tld.length >= 2;
+    }
+
+    function $id(i) { return document.getElementById(i); }
+    function setMsg(id, txt, type) {
+      const el = $id(id);
+      el.textContent = txt;
+      el.className = 'wh-msg' + (txt ? ' wh-show wh-'+type : '');
+    }
+    function setInp(id, state) {
+      const el = $id(id);
+      el.classList.remove('wh-err','wh-ok');
+      if (state) el.classList.add('wh-'+state);
+    }
+    function showAlert(alertId, txtId, msg) {
+      $id(alertId).className = 'wh-alert wh-err wh-show';
+      $id(txtId).textContent = msg;
+      const m = $id('wiki-modal');
+      m.classList.remove('wiki-shake');
+      void m.offsetWidth;
+      m.classList.add('wiki-shake');
+    }
+    function wClearAlert(id) { $id(id).className = 'wh-alert wh-err'; }
+
+    window.wikiOpen = function() {
+      if (ME) { showLoggedIn(); }
+      $id('wiki-overlay').classList.add('wiki-open');
+    };
+    window.wikiClose = function() { $id('wiki-overlay').classList.remove('wiki-open'); };
+    window.wikiOverlayClick = function(e) { if(e.target===$id('wiki-overlay')) wikiClose(); };
+
+    document.addEventListener('keydown', e => { if(e.key==='Escape') wikiClose(); });
+
+    window.wikiTab = function(t) {
+      $id('wiki-tab-reg').classList.toggle('wh-active', t==='reg');
+      $id('wiki-tab-log').classList.toggle('wh-active', t==='log');
+      $id('wiki-panel-reg').style.display = t==='reg' ? '' : 'none';
+      $id('wiki-panel-log').style.display = t==='log' ? '' : 'none';
+      $id('wiki-success').style.display = 'none';
+      $id('wiki-loggedin').style.display = 'none';
+      $id('wiki-tabs').style.display = '';
+      $id('wiki-modal-title').textContent = t==='reg' ? 'Rejoindre le site' : 'Se connecter';
+    };
+
+    window.wvEmailLive = function(iid, mid) {
+      const v = $id(iid).value.trim();
+      if (!v) { setMsg(mid,'',''); setInp(iid,null); return; }
+      if (!validFmt(v)) { setMsg(mid,'Format invalide – ex: nom@gmail.com','err'); setInp(iid,'err'); }
+      else if (!validDomain(v)) { setMsg(mid,'⚠ Domaine inconnu – vérifiez votre adresse','warn'); setInp(iid,'err'); }
+      else { setMsg(mid,'✔ Adresse valide','ok'); setInp(iid,'ok'); }
+    };
+    window.wvEmailBlur = function(iid, mid) {
+      wvEmailLive(iid, mid);
+      if (!$id(iid).value.trim()) { setMsg(mid,'Ce champ est requis.','err'); setInp(iid,'err'); }
+    };
+
+    window.wvEmailMatch = function() {
+      const a = $id('wr-email').value.trim(), b = $id('wr-email2').value.trim();
+      if (!b) { setMsg('wm-email2','',''); setInp('wr-email2',null); return; }
+      if (a!==b) { setMsg('wm-email2','Les courriels ne correspondent pas.','err'); setInp('wr-email2','err'); }
+      else { setMsg('wm-email2','✔ Courriels identiques','ok'); setInp('wr-email2','ok'); }
+    };
+
+    window.wvStrength = function() {
+      const pw = $id('wr-pw').value;
+      let s = 0;
+      if (pw.length >= 8) s++;
+      if (/[A-Z]/.test(pw)) s++;
+      if (/[0-9]/.test(pw)) s++;
+      if (/[^A-Za-z0-9]/.test(pw)) s++;
+      const levels = [
+        {w:'0%',bg:'#eee',txt:''},
+        {w:'25%',bg:'#d33',txt:'Très faible'},
+        {w:'50%',bg:'#e68a00',txt:'Moyen'},
+        {w:'75%',bg:'#3a7d44',txt:'Fort'},
+        {w:'100%',bg:'#14866d',txt:'Très fort'},
+      ];
+      const l = levels[s];
+      $id('wstr-fill').style.cssText = `width:${l.w};background:${l.bg}`;
+      const lbl = $id('wstr-lbl');
+      lbl.textContent = l.txt; lbl.style.color = l.bg;
+    };
+
+    window.wvPwMatch = function() {
+      const a = $id('wr-pw').value, b = $id('wr-pw2').value;
+      if (!b) { setMsg('wm-pw2','',''); setInp('wr-pw2',null); return; }
+      if (a!==b) { setMsg('wm-pw2','Les mots de passe ne correspondent pas.','err'); setInp('wr-pw2','err'); }
+      else { setMsg('wm-pw2','✔ Mots de passe identiques','ok'); setInp('wr-pw2','ok'); }
+    };
+
+    window.wSubmitReg = function() {
+      wClearAlert('wa-reg');
+      const em = $id('wr-email').value.trim();
+      const em2= $id('wr-email2').value.trim();
+      const pw = $id('wr-pw').value;
+      const pw2= $id('wr-pw2').value;
+
+      if (!em)           return showAlert('wa-reg','wa-reg-txt','Veuillez entrer votre adresse courriel.');
+      if (!validFmt(em)) return showAlert('wa-reg','wa-reg-txt','Adresse courriel invalide. Exemple : nom@gmail.com');
+      if (!validDomain(em)) return showAlert('wa-reg','wa-reg-txt','Ce domaine courriel n\'est pas reconnu.');
+      if (em !== em2)    return showAlert('wa-reg','wa-reg-txt','Les adresses courriel ne correspondent pas.');
+      if (pw.length < 8) return showAlert('wa-reg','wa-reg-txt','Mot de passe trop court (8 caractères minimum).');
+      if (pw !== pw2)    return showAlert('wa-reg','wa-reg-txt','Les mots de passe ne correspondent pas.');
+      if (DB[em])        return showAlert('wa-reg','wa-reg-txt','Ce courriel est déjà enregistré. Connectez-vous.');
+
+      DB[em] = { pw };
+
+      $id('wiki-panel-reg').style.display = 'none';
+      $id('wiki-tabs').style.display = 'none';
+      $id('wiki-success').style.display = 'block';
+      $id('wiki-modal-title').textContent = 'Inscription réussie !';
+    };
+
+    window.wSubmitLog = function() {
+      wClearAlert('wa-log');
+      const em = $id('wl-email').value.trim();
+      const pw = $id('wl-pw').value;
+
+      if (!em)            return showAlert('wa-log','wa-log-txt','Veuillez entrer votre adresse courriel.');
+      if (!validFmt(em))  return showAlert('wa-log','wa-log-txt','Format de courriel invalide.');
+      if (!pw)            return showAlert('wa-log','wa-log-txt','Veuillez entrer votre mot de passe.');
+      if (!DB[em])        return showAlert('wa-log','wa-log-txt','Aucun compte trouvé. Inscrivez-vous d\'abord.');
+      if (DB[em].pw !== pw) return showAlert('wa-log','wa-log-txt','Mot de passe incorrect. Réessayez.');
+
+      ME = em;
+      updateBtn();
+      showLoggedIn();
+    };
+
+    function showLoggedIn() {
+      $id('wiki-panel-reg').style.display = 'none';
+      $id('wiki-panel-log').style.display = 'none';
+      $id('wiki-success').style.display = 'none';
+      $id('wiki-tabs').style.display = 'none';
+      $id('wiki-loggedin').style.display = 'block';
+      $id('wk-avatar').textContent = ME.charAt(0).toUpperCase();
+      $id('wk-greet').textContent = 'Bonjour, ' + ME.split('@')[0] + ' !';
+      $id('wk-email').textContent = ME;
+      $id('wiki-modal-title').textContent = 'Mon compte';
+    }
+
+    window.wLogout = function() {
+      ME = null;
+      updateBtn();
+      wikiClose();
+      wikiTab('reg');
+      ['wr-email','wr-email2','wr-pw','wr-pw2','wl-email','wl-pw'].forEach(id => {
+        const el = $id(id); if(el){ el.value=''; el.className='wh-input'; }
+      });
+      ['wm-email','wm-email2','wm-pw2'].forEach(id => setMsg(id,'',''));
+      $id('wstr-fill').style.cssText = 'width:0%';
+      $id('wstr-lbl').textContent = '';
+    };
+
+    function updateBtn() {
+      $id('wiki-btn-txt').textContent = ME ? ME.split('@')[0] : 'Créer un compte';
+    }
+  })();
+  </script>
+
+  <style>
+#wiki-auth-btn {
+  position: fixed;
+  top: 14px;
+  right: 18px;
+  z-index: 9999;
+  background: #f8f9fa;
+  border: 1px solid #a2a9b1;
+  padding: 5px 11px;
+  font-family: 'Linux Libertine', Georgia, 'Times New Roman', serif;
+  font-size: 0.82rem;
+  color: #0645ad;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: background 0.15s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+#wiki-auth-btn:hover { background: #eaf3fb; }
+#wiki-auth-btn svg { width: 15px; height: 15px; fill: #54595d; flex-shrink: 0; }
+
+#wiki-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+}
+#wiki-overlay.wiki-open { display: flex; animation: wikiFadeIn 0.18s ease; }
+@keyframes wikiFadeIn { from{opacity:0} to{opacity:1} }
+
+#wiki-modal {
+  background: #fff;
+  border: 1px solid #a2a9b1;
+  width: 400px;
+  max-width: 95vw;
+  max-height: 92vh;
+  overflow-y: auto;
+  border-radius: 2px;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.22);
+  font-family: 'Linux Libertine', Georgia, 'Times New Roman', serif;
+  position: relative;
+  animation: wikiSlideUp 0.2s ease;
+}
+@keyframes wikiSlideUp { from{transform:translateY(18px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+.wh-head {
+  background: #f8f9fa;
+  border-bottom: 1px solid #a2a9b1;
+  padding: 12px 16px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.wh-head-left { display: flex; align-items: center; gap: 9px; }
+.wh-logo { width: 36px; height: 36px; }
+.wh-title { font-size: 1rem; font-weight: bold; color: #000; }
+.wh-subtitle { font-size: 0.76rem; color: #54595d; }
+.wh-close {
+  background: none; border: none; font-size: 1.2rem; color: #54595d;
+  cursor: pointer; padding: 2px 6px; border-radius: 2px; line-height:1;
+  transition: background 0.12s;
+}
+.wh-close:hover { background: #eee; color: #000; }
+
+.wh-tabs { display: flex; border-bottom: 1px solid #a2a9b1; background: #f8f9fa; }
+.wh-tab {
+  flex: 1; padding: 8px 0; background: none; border: none;
+  border-bottom: 3px solid transparent;
+  font-family: inherit; font-size: 0.87rem; color: #54595d; cursor: pointer;
+  transition: all 0.13s;
+}
+.wh-tab.wh-active { color: #0645ad; border-bottom-color: #0645ad; background: #fff; font-weight: bold; }
+.wh-tab:hover:not(.wh-active) { background: #eaf3fb; color: #0645ad; }
+
+.wh-body { padding: 18px 20px 16px; }
+.wh-field { margin-bottom: 13px; }
+.wh-label { display: block; font-size: 0.82rem; font-weight: bold; color: #202122; margin-bottom: 4px; }
+.wh-input {
+  width: 100%; padding: 7px 10px;
+  border: 1px solid #a2a9b1; border-radius: 2px;
+  font-family: inherit; font-size: 0.88rem; color: #202122;
+  background: #fff; outline: none; box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.wh-input:focus { border-color: #0645ad; box-shadow: 0 0 0 2px rgba(6,69,173,0.12); }
+.wh-input.wh-err { border-color: #d33; box-shadow: 0 0 0 2px rgba(211,51,51,0.1); }
+.wh-input.wh-ok  { border-color: #14866d; box-shadow: 0 0 0 2px rgba(20,134,109,0.1); }
+
+.wh-msg {
+  display: none; font-size: 0.77rem; margin-top: 3px;
+  padding: 3px 7px; border-radius: 2px;
+}
+.wh-msg.wh-show { display: block; }
+.wh-msg.wh-err { background: #fee7e6; border: 1px solid #d33; color: #7a1919; }
+.wh-msg.wh-ok  { background: #d5fdf4; border: 1px solid #14866d; color: #0e5647; }
+.wh-msg.wh-warn { background: #fef6e7; border: 1px solid #e8a000; color: #714700; }
+
+.wh-alert {
+  display: none; margin-bottom: 13px; padding: 8px 11px;
+  border-radius: 2px; font-size: 0.83rem; border-left: 4px solid;
+  align-items: flex-start; gap: 7px;
+}
+.wh-alert.wh-show { display: flex; }
+.wh-alert.wh-err  { background: #fee7e6; border-color: #d33; color: #7a1919; }
+.wh-alert.wh-ok   { background: #d5fdf4; border-color: #14866d; color: #0e5647; }
+
+.wh-bar { height: 4px; background: #eee; border-radius: 2px; margin-top: 5px; overflow: hidden; }
+.wh-bar-fill { height: 100%; border-radius: 2px; width: 0%; transition: width .3s, background .3s; }
+.wh-str-lbl { font-size: 0.73rem; margin-top: 2px; }
+
+.wh-btn {
+  width: 100%; padding: 9px; background: #0645ad; color: #fff;
+  border: none; border-radius: 2px; font-family: inherit; font-size: 0.9rem;
+  font-weight: bold; cursor: pointer; margin-top: 4px;
+  transition: background 0.15s;
+}
+.wh-btn:hover { background: #0c3c8a; }
+.wh-btn:active { background: #082d6a; }
+
+.wh-div {
+  text-align: center; color: #54595d; font-size: 0.77rem;
+  margin: 9px 0; position: relative;
+}
+.wh-div::before,.wh-div::after {
+  content:''; position:absolute; top:50%; width:42%; height:1px; background:#a2a9b1;
+}
+.wh-div::before{left:0} .wh-div::after{right:0}
+
+.wh-switch { text-align: center; font-size: 0.8rem; color: #54595d; }
+.wh-switch a { color: #0645ad; cursor: pointer; }
+
+.wh-success { display: none; text-align: center; padding: 28px 20px; }
+.wh-success .wh-check { font-size: 2.8rem; margin-bottom: 8px; }
+.wh-success h3 { font-size: 1rem; margin-bottom: 5px; }
+.wh-success p { font-size: 0.83rem; color: #54595d; margin-bottom: 14px; }
+
+.wh-loggedin { display: none; padding: 22px 20px; text-align: center; }
+.wh-avatar {
+  width: 52px; height: 52px; background: #0645ad; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; color: #fff; margin: 0 auto 10px;
+  font-family: Georgia, serif; font-weight: bold;
+}
+.wh-loggedin h3 { font-size: 1rem; margin-bottom: 4px; }
+.wh-loggedin .wh-email-lbl { font-size: 0.82rem; color: #54595d; }
+.wh-loggedin .wh-connected { font-size: 0.79rem; color: #14866d; margin-top: 5px; }
+.wh-logout {
+  background: none; border: 1px solid #a2a9b1;
+  padding: 6px 16px; font-family: inherit; font-size: 0.82rem;
+  color: #54595d; cursor: pointer; border-radius: 2px; margin-top: 10px;
+  transition: background 0.12s;
+}
+.wh-logout:hover { background: #eee; color: #000; }
+
+.wh-foot {
+  background: #f8f9fa; border-top: 1px solid #a2a9b1;
+  padding: 7px 14px; font-size: 0.72rem; color: #54595d; text-align: center;
+}
+.wh-foot a { color: #0645ad; }
+
+@keyframes wikiShake {
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)}
+}
+.wiki-shake { animation: wikiShake 0.38s ease; }
+</style>
+<body>
+
+  <header>
+    <title>Bloodborne (histoire)</title>
+  </header>
+
+  <style>
+  .invisborder {
+   border: 2px solid #FFFFFF;
+   padding: 5px;
+   width: 4
+}
+  </style>
+
+  <style>
+    .decorated-text {
+      text-decoration: underline overline;
+    }
+  </style><meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bloodborne</title>
+  <link rel="stylesheet" href="Bloodborne.css">
+  <link rel="stylesheet" href="sidebar.css">
+
+  <nav class="sidebar">
+    <h2>Sommaire</h2>
+
+    <style>
+      .nav-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .nav-list {
+        margin-bottom: 10px;
+      }
+      .nav-list {
+        background-color: #2673ec;
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      .nav-list button:hover {
+        background-color: #174ea6;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+    </style>
+
+    <ul>
+  <button onclick="location.href='#section1'">Histoire general</button>
+  <button onclick="location.href='#section2'">Specific 1</button>
+  <button onclick="location.href='#section3'">Specific 2</button>
+</ul>
+  </nav>
+
+  <style>
+      h1 {
+         border-bottom: 2px solid black;
+         padding: 10px 0;
+         margin: 0;
+         width: 100%;
+         box-sizing: border-box;
+         text-align: left;
+      }
+    </style>
+
+  <main class="main-content">
+    <h1 style="font-size:50px;">Bloodborne</h1>
+    <div style="height:10px;"></div>
+    <h2 id="section1">Histoire general</h2>
+
+    <p class="invisborder">
+      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+      Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident,
+      sunt in culpa qui officia deserunt mollit anim id est laborum.
+    <div style="height:600px;"></div>
+    <h2 id="section2">Les Grands Êtres</h2>
+    <p>paragraphe relié au Grands Êtres</p>
+
+    <div style="height:600px;"></div>
+    <h2 id="section3">Specific 2</h2>
+    <p>Paragraphe relié au specific 2.</p>
+  </main>
+
+        <style>
+                {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 20px;
+            }
+
+            .infobox {
+                position: fixed;
+                right: 20px;
+                top: 20px;
+                width: 220px;
+                background: #f0f0f0;
+                padding: 10px;
+                border: 1px solid #ccc;
+            }
+
+            .infobox img {
+                width: 100%;
+                border: 1px solid #ccc;
+            }
+
+            .content {
+                margin-right: 260px;
+            }
+
+
+        </style>
+
+    </div> <div class="infobox">
+        <h3>Infos</h3>
+        <img src="https://i.etsystatic.com/23631389/r/il/fa3740/3943087390/il_fullxfull.3943087390_35l4.jpg" alt="Bloodborne">
+        <p><strong>Type:</strong> Jeu</p>
+        <p><strong>Année de publication:</strong> 24 mars 2015</p>
+        <p><strong>Développeur:</strong> FromSoftware</p>
+        <p><strong>Directeur:</strong> Hidetaka Miyazaki</p>
+    </div>
+
+
+    <button id="wiki-auth-btn" onclick="wikiOpen()">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+      <span id="wiki-btn-txt">Créer un compte</span>
+    </button>
+
+    <div id="wiki-overlay" onclick="wikiOverlayClick(event)">
+    <div id="wiki-modal">
+
+      <div class="wh-head">
+        <div class="wh-head-left">
+          <svg class="wh-logo" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="25" cy="25" r="22" fill="none" stroke="#a2a9b1" stroke-width="1.5"/>
+            <ellipse cx="25" cy="25" rx="10" ry="22" fill="none" stroke="#a2a9b1" stroke-width="1.5"/>
+            <line x1="3" y1="25" x2="47" y2="25" stroke="#a2a9b1" stroke-width="1.5"/>
+            <line x1="7" y1="15" x2="43" y2="15" stroke="#a2a9b1" stroke-width="1"/>
+            <line x1="7" y1="35" x2="43" y2="35" stroke="#a2a9b1" stroke-width="1"/>
+            <text x="25" y="30" font-size="13" text-anchor="middle" fill="#202122" font-family="Georgia">W</text>
+          </svg>
+          <div>
+            <div class="wh-title" id="wiki-modal-title">Rejoindre le site</div>
+            <div class="wh-subtitle">Créez votre compte gratuit</div>
+          </div>
+        </div>
+        <button class="wh-close" onclick="wikiClose()">✕</button>
+      </div>
+
+      <div class="wh-tabs" id="wiki-tabs">
+        <button class="wh-tab wh-active" id="wiki-tab-reg" onclick="wikiTab('reg')">S'inscrire</button>
+        <button class="wh-tab" id="wiki-tab-log" onclick="wikiTab('log')">Se connecter</button>
+      </div>
+
+      <div id="wiki-panel-reg">
+        <div class="wh-body">
+          <div class="wh-alert wh-err" id="wa-reg"><span>⚠&nbsp;</span><span id="wa-reg-txt"></span></div>
+
+          <div class="wh-field">
+            <label class="wh-label" for="wr-email">Adresse courriel</label>
+            <input class="wh-input" type="email" id="wr-email" placeholder="nom@domaine.com"
+              oninput="wvEmailLive('wr-email','wm-email')"
+              onblur="wvEmailBlur('wr-email','wm-email')">
+            <div class="wh-msg" id="wm-email"></div>
+          </div>
+
+          <div class="wh-field">
+            <label class="wh-label" for="wr-email2">Confirmer le courriel</label>
+            <input class="wh-input" type="email" id="wr-email2" placeholder="Répétez votre courriel"
+              oninput="wvEmailMatch()" onblur="wvEmailMatch()">
+            <div class="wh-msg" id="wm-email2"></div>
+          </div>
+
+          <div class="wh-field">
+            <label class="wh-label" for="wr-pw">Mot de passe</label>
+            <input class="wh-input" type="password" id="wr-pw" placeholder="Minimum 8 caractères"
+              oninput="wvStrength(); wvPwMatch()">
+            <div class="wh-bar"><div class="wh-bar-fill" id="wstr-fill"></div></div>
+            <div class="wh-str-lbl" id="wstr-lbl"></div>
+          </div>
+
+          <div class="wh-field">
+            <label class="wh-label" for="wr-pw2">Confirmer le mot de passe</label>
+            <input class="wh-input" type="password" id="wr-pw2" placeholder="Répétez votre mot de passe"
+              oninput="wvPwMatch()" onblur="wvPwMatch()">
+            <div class="wh-msg" id="wm-pw2"></div>
+          </div>
+
+          <button class="wh-btn" onclick="wSubmitReg()">Créer votre compte</button>
+          <div class="wh-div" style="margin-top:10px">ou</div>
+          <div class="wh-switch">Déjà un compte ?&nbsp;<a onclick="wikiTab('log')">Connectez-vous</a></div>
+        </div>
+      </div>
+
+      <div id="wiki-panel-log" style="display:none">
+        <div class="wh-body">
+          <div class="wh-alert wh-err" id="wa-log"><span>⚠&nbsp;</span><span id="wa-log-txt"></span></div>
+
+          <div class="wh-field">
+            <label class="wh-label" for="wl-email">Adresse courriel</label>
+            <input class="wh-input" type="email" id="wl-email" placeholder="nom@domaine.com"
+              oninput="wClearAlert('wa-log')">
+          </div>
+
+          <div class="wh-field">
+            <label class="wh-label" for="wl-pw">Mot de passe</label>
+            <input class="wh-input" type="password" id="wl-pw" placeholder="Votre mot de passe"
+              oninput="wClearAlert('wa-log')">
+            <div style="margin-top:3px;font-size:0.75rem"><a href="#" style="color:#0645ad" onclick="return false">Mot de passe oublié ?</a></div>
+          </div>
+
+          <button class="wh-btn" onclick="wSubmitLog()">Se connecter</button>
+          <div class="wh-div" style="margin-top:10px">ou</div>
+          <div class="wh-switch">Pas de compte ?&nbsp;<a onclick="wikiTab('reg')">Inscrivez-vous</a></div>
+        </div>
+      </div>
+
+      <div class="wh-success" id="wiki-success">
+        <div class="wh-check">✅</div>
+        <h3>Compte créé avec succès !</h3>
+        <p>Connectez-vous maintenant avec vos identifiants.</p>
+        <button class="wh-btn" style="max-width:180px;margin:0 auto" onclick="wikiTab('log')">Se connecter</button>
+      </div>
+
+      <div class="wh-loggedin" id="wiki-loggedin">
+        <div class="wh-avatar" id="wk-avatar">U</div>
+        <h3 id="wk-greet">Bonjour !</h3>
+        <div class="wh-email-lbl" id="wk-email"></div>
+        <div class="wh-connected">✔ Connecté</div>
+        <button class="wh-logout" onclick="wLogout()">Se déconnecter</button>
+      </div>
+
+      <div class="wh-foot">
+        En vous inscrivant, vous acceptez nos <a href="#">Conditions</a> et notre <a href="#">Politique de confidentialité</a>.
+      </div>
+
+    </div>
+    </div>
+  </body>
+</head>
+  </html>
