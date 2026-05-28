@@ -38,19 +38,16 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const BtnLogin = document.getElementById("btnLogin");
-const BtnRegister = document.getElementById("btnRegister");
+const Se Connecter = document.getElementById("Se connecter");
+const S'inscrire = document.getElementById("btnRegister");
 
-//  Récupération des conteneurs de formulaires
 const LoginContainer = document.getElementById("loginFormContainer");
 const RegisterContainer = document.getElementById("registerFormContainer");
 
 
-//  Récupération des données
 const LoginForm = document.getElementById("loginForm");
 const RegisterForm = document.getElementById("registerForm");
 
-//  Récupération des erreurs
 const LoginError = document.getElementById("loginError");
 const RegisterError = document.getElementById("registerError")
 
