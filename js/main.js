@@ -1,3 +1,5 @@
+window.addEventListener('DOMContentLoaded', () => {
+   
 <script>
 (function() {
 
@@ -506,3 +508,5 @@ console.log("Réponse Supabase", data, error);
 }
 
 )
+console.log("HTML is ready, code running!");
+});
