@@ -399,20 +399,17 @@ const LoginError = document.getElementById("loginError");
 const RegisterError = document.getElementById("registerError")
 
 
-//Champs formulaire de connexion
 const LoginEmail = document.getElementById("loginEmail");
 const LoginPassword = document.getElementById("loginPassword");
 
 
 
-//Champs du formulaire d'inscription
 const RegisterEmail = document.getElementById("registerEmail");
 const RegisterPassword = document.getElementById("registerPassword");
 const RegisterPrenom = document.getElementById("registerPrenom");
 const RegisterNom = document.getElementById("registerNom");
 
 
-//  Quand on clique sur "Se connecter", on fait apparître le formulaire   Ceci permet juste de faire apparaître le formulaire
 BtnLogin.addEventListener("click", () => {
     LoginContainer.classList.remove("hidden");
     RegisterContainer.classList.add("hidden");
@@ -420,7 +417,6 @@ BtnLogin.addEventListener("click", () => {
 });
 
 
-//  Quand on clique sur "S'inscrire", on fait apparaître le formulaire    Ceci permet juste de faire apparaître le formulaire
 BtnRegister.addEventListener("click", () => {
     RegisterContainer.classList.remove("hidden");
     LoginContainer.classList.add("hidden");
@@ -429,7 +425,6 @@ BtnRegister.addEventListener("click", () => {
 
 
 
-//  Fonction de validation de l'email
 function validateEmail(email) {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email.trim());
@@ -439,7 +434,6 @@ function validateEmail(email) {
 
 
 
-// Fonction de validation du mot de passe
 function validatePassword (password) {
     const miniLength = /.{6,}/;
     const lowercase = /[a-z]/;
@@ -460,11 +454,11 @@ function validatePassword (password) {
 console.log("Tentative inscription", Email, Prenom, Nom);
 
 
-//Contrôle des données du formulaire d'inscription
-RegisterForm.addEventListener("submit", async (event) => {
-    event.preventDefault();     //Empêche l'envoi automatique du formulaire
 
-//  Récupération des valeurs des formulaires
+RegisterForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+
     const Email = RegisterEmail.value.trim();
     const Password = RegisterPassword.value;
     const Prenom = RegisterPrenom.value.trim();
@@ -472,13 +466,13 @@ RegisterForm.addEventListener("submit", async (event) => {
 
 
 
-    //  Vérification de l'email
+    
     if (!validateEmail(Email)) {
         RegisterError.textContent = "Adresse email invalide.";
         return;
     }
 
-    //Vérification mot de passe
+    
     if (!validatePassword(Password)) {
         RegisterError.textContent = "Le mot de passe doit contenir au moins 6 caractères, une minuscule, une majuscule, un chiffre et un caractère spécial.";
         return;
@@ -486,14 +480,13 @@ RegisterForm.addEventListener("submit", async (event) => {
     RegisterError.textContent ="";
 
 
-//  Inscription Supabase
 const { data, error } = await supabase.auth.signUp({
-    email: Email,
-    password: Password,
+    email: email,
+    password: password,
     options: {
         data: {
-            prenom: Prenom,
-            nom: Nom
+            prenom: prenom,
+            nom: nom
         }
     }
 });
@@ -506,7 +499,6 @@ console.log("Réponse Supabase", data, error);
 
 
 
-//  Affichage de la page de connexion
     RegisterError.textContent = "";
     LoginContainer.classList.remove("hidden");
     RegisterContainer.classList.add("hidden");
