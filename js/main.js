@@ -1,6 +1,4 @@
-window.addEventListener('DOMContentLoaded', () => {
-   
-(function() {
+   (function() {
 
   const DB = {};
   let ME = null;
@@ -506,5 +504,5 @@ console.log("Réponse Supabase", data, error);
 }
 
 )
-console.log("HTML is ready, code running!");
+
 });
