@@ -168,9 +168,6 @@
   function updateBtn() {
     $id('wiki-btn-txt').textContent = ME ? ME.split('@')[0] : 'Créer un compte';
   }
-})();
-
-  (function() {
 
     const DB = {};
     let ME = null;
