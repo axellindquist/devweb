@@ -1,6 +1,5 @@
 window.addEventListener('DOMContentLoaded', () => {
    
-<script>
 (function() {
 
   const DB = {};
@@ -172,8 +171,7 @@ window.addEventListener('DOMContentLoaded', () => {
     $id('wiki-btn-txt').textContent = ME ? ME.split('@')[0] : 'Créer un compte';
   }
 })();
-</script>
-  <script>
+
   (function() {
 
     const DB = {};
@@ -345,7 +343,7 @@ window.addEventListener('DOMContentLoaded', () => {
       $id('wiki-btn-txt').textContent = ME ? ME.split('@')[0] : 'Créer un compte';
     }
   })();
-  </script>
+  
       
 import { createClient } from '@supabase/supabase-js'
 
