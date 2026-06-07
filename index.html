@@ -150,13 +150,30 @@
 
     .wh-tabs { display: flex; border-bottom: 1px solid #a2a9b1; background: #f8f9fa; }
     .wh-tab {
-      flex: 1; padding: 8px 0; background: none; border: none;
-      border-bottom: 3px solid transparent;
-      font-family: inherit; font-size: 0.87rem; color: #54595d; cursor: pointer;
-      transition: all 0.13s;
+      flex: 1; padding: 8px 0; background: none !important;
+      border: none !important; border-bottom: 3px solid transparent !important;
+      font-family: 'Linux Libertine', Georgia, 'Times New Roman', serif;
+      font-size: 0.87rem; color: #54595d; cursor: pointer;
+      transition: all 0.13s; text-align: center; display: block;
+      width: 100%; box-sizing: border-box;
     }
-    .wh-tab.wh-active { color: #0645ad; border-bottom-color: #0645ad; background: #fff; font-weight: bold; }
-    .wh-tab:hover:not(.wh-active) { background: #eaf3fb; color: #0645ad; }
+    .wh-tab.wh-active { color: #0645ad !important; border-bottom-color: #0645ad !important; background: #fff !important; font-weight: bold; }
+    .wh-tab:hover:not(.wh-active) { background: #eaf3fb !important; color: #0645ad !important; }
+    .wh-btn {
+      width: 100% !important; padding: 9px !important; background: #0645ad !important; color: #fff !important;
+      border: none !important; border-radius: 2px; font-family: inherit; font-size: 0.9rem;
+      font-weight: bold; cursor: pointer; margin-top: 4px; display: block;
+      transition: background 0.15s; text-align: center; box-sizing: border-box;
+    }
+    .wh-btn:hover  { background: #0c3c8a !important; }
+    .wh-btn:active { background: #082d6a !important; }
+    .wh-logout {
+      background: none !important; border: 1px solid #a2a9b1 !important;
+      padding: 6px 16px !important; font-family: inherit; font-size: 0.82rem;
+      color: #54595d !important; cursor: pointer; border-radius: 2px; margin-top: 10px;
+      transition: background 0.12s; display: inline-block;
+    }
+    .wh-logout:hover { background: #eee !important; color: #000 !important; }
 
 
     .wh-body { padding: 18px 20px 16px; }
@@ -192,15 +209,6 @@
     .wh-bar-fill { height: 100%; border-radius: 2px; width: 0%; transition: width .3s, background .3s; }
     .wh-str-lbl { font-size: 0.73rem; margin-top: 2px; }
 
-    .wh-btn {
-      width: 100%; padding: 9px; background: #0645ad; color: #fff;
-      border: none; border-radius: 2px; font-family: inherit; font-size: 0.9rem;
-      font-weight: bold; cursor: pointer; margin-top: 4px;
-      transition: background 0.15s;
-    }
-    .wh-btn:hover   { background: #0c3c8a; }
-    .wh-btn:active  { background: #082d6a; }
-
     .wh-div {
       text-align: center; color: #54595d; font-size: 0.77rem;
       margin: 9px 0; position: relative;
@@ -228,14 +236,6 @@
     .wh-loggedin h3           { font-size: 1rem; margin-bottom: 4px; }
     .wh-loggedin .wh-email-lbl { font-size: 0.82rem; color: #54595d; }
     .wh-loggedin .wh-connected { font-size: 0.79rem; color: #14866d; margin-top: 5px; }
-    .wh-logout {
-      background: none; border: 1px solid #a2a9b1;
-      padding: 6px 16px; font-family: inherit; font-size: 0.82rem;
-      color: #54595d; cursor: pointer; border-radius: 2px; margin-top: 10px;
-      transition: background 0.12s;
-    }
-    .wh-logout:hover { background: #eee; color: #000; }
-
     .wh-foot {
       background: #f8f9fa; border-top: 1px solid #a2a9b1;
       padding: 7px 14px; font-size: 0.72rem; color: #54595d; text-align: center;
