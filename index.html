@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bloodborne (histoire)</title>
- 
+
   <link rel="stylesheet" href="Bloodborne.css">
   <link rel="stylesheet" href="sidebar.css">
- 
+
   <style>
     /* ── Reset / base ───────────────────────────────────────────────────── */
     body {
@@ -16,19 +16,19 @@
       margin: 0;
       padding: 20px;
     }
- 
+
     /* ── Invisible border helper ────────────────────────────────────────── */
     .invisborder {
       border: 2px solid #FFFFFF;
       padding: 5px;
       width: 4px;
     }
- 
+
     /* ── Underline + overline ───────────────────────────────────────────── */
     .decorated-text {
       text-decoration: underline overline;
     }
- 
+
     /* ── Section headings ───────────────────────────────────────────────── */
     h1 {
       border-bottom: 2px solid black;
@@ -38,7 +38,7 @@
       box-sizing: border-box;
       text-align: left;
     }
- 
+
     /* ── Sidebar nav ────────────────────────────────────────────────────── */
     .nav-list {
       list-style: none;
@@ -61,7 +61,7 @@
       background-color: #174ea6;
     }
     html { scroll-behavior: smooth; }
- 
+
     /* ── Infobox ────────────────────────────────────────────────────────── */
     .infobox {
       position: fixed;
@@ -74,7 +74,7 @@
       z-index: 100;
     }
     .infobox img { width: 100%; border: 1px solid #ccc; }
- 
+
     /* ── Auth button (top-right, above infobox) ─────────────────────────── */
     #wiki-auth-btn {
       position: fixed;
@@ -99,7 +99,7 @@
     }
     #wiki-auth-btn:hover { background: #eaf3fb; }
     #wiki-auth-btn svg { width: 15px; height: 15px; fill: #54595d; flex-shrink: 0; }
- 
+
     /* ── Overlay + modal ────────────────────────────────────────────────── */
     #wiki-overlay {
       display: none;
@@ -112,7 +112,7 @@
     }
     #wiki-overlay.wiki-open { display: flex; animation: wikiFadeIn 0.18s ease; }
     @keyframes wikiFadeIn { from{opacity:0} to{opacity:1} }
- 
+
     #wiki-modal {
       background: #fff;
       border: 1px solid #a2a9b1;
@@ -127,7 +127,7 @@
       animation: wikiSlideUp 0.2s ease;
     }
     @keyframes wikiSlideUp { from{transform:translateY(18px);opacity:0} to{transform:translateY(0);opacity:1} }
- 
+
     /* ── Modal sub-components ───────────────────────────────────────────── */
     .wh-head {
       background: #f8f9fa;
@@ -147,7 +147,7 @@
       transition: background 0.12s;
     }
     .wh-close:hover { background: #eee; color: #000; }
- 
+
     .wh-tabs { display: flex; border-bottom: 1px solid #a2a9b1; background: #f8f9fa; }
     .wh-tab {
       flex: 1; padding: 8px 0; background: none; border: none;
@@ -157,7 +157,7 @@
     }
     .wh-tab.wh-active { color: #0645ad; border-bottom-color: #0645ad; background: #fff; font-weight: bold; }
     .wh-tab:hover:not(.wh-active) { background: #eaf3fb; color: #0645ad; }
- 
+
     .wh-body { padding: 18px 20px 16px; }
     .wh-field { margin-bottom: 13px; }
     .wh-label { display: block; font-size: 0.82rem; font-weight: bold; color: #202122; margin-bottom: 4px; }
@@ -171,13 +171,13 @@
     .wh-input:focus { border-color: #0645ad; box-shadow: 0 0 0 2px rgba(6,69,173,0.12); }
     .wh-input.wh-err { border-color: #d33; box-shadow: 0 0 0 2px rgba(211,51,51,0.1); }
     .wh-input.wh-ok  { border-color: #14866d; box-shadow: 0 0 0 2px rgba(20,134,109,0.1); }
- 
+
     .wh-msg { display: none; font-size: 0.77rem; margin-top: 3px; padding: 3px 7px; border-radius: 2px; }
     .wh-msg.wh-show { display: block; }
     .wh-msg.wh-err  { background: #fee7e6; border: 1px solid #d33; color: #7a1919; }
     .wh-msg.wh-ok   { background: #d5fdf4; border: 1px solid #14866d; color: #0e5647; }
     .wh-msg.wh-warn { background: #fef6e7; border: 1px solid #e8a000; color: #714700; }
- 
+
     .wh-alert {
       display: none; margin-bottom: 13px; padding: 8px 11px;
       border-radius: 2px; font-size: 0.83rem; border-left: 4px solid;
@@ -186,11 +186,11 @@
     .wh-alert.wh-show { display: flex; }
     .wh-alert.wh-err  { background: #fee7e6; border-color: #d33; color: #7a1919; }
     .wh-alert.wh-ok   { background: #d5fdf4; border-color: #14866d; color: #0e5647; }
- 
+
     .wh-bar { height: 4px; background: #eee; border-radius: 2px; margin-top: 5px; overflow: hidden; }
     .wh-bar-fill { height: 100%; border-radius: 2px; width: 0%; transition: width .3s, background .3s; }
     .wh-str-lbl { font-size: 0.73rem; margin-top: 2px; }
- 
+
     .wh-btn {
       width: 100%; padding: 9px; background: #0645ad; color: #fff;
       border: none; border-radius: 2px; font-family: inherit; font-size: 0.9rem;
@@ -199,7 +199,7 @@
     }
     .wh-btn:hover   { background: #0c3c8a; }
     .wh-btn:active  { background: #082d6a; }
- 
+
     .wh-div {
       text-align: center; color: #54595d; font-size: 0.77rem;
       margin: 9px 0; position: relative;
@@ -208,15 +208,15 @@
       content: ''; position: absolute; top: 50%; width: 42%; height: 1px; background: #a2a9b1;
     }
     .wh-div::before { left: 0; } .wh-div::after { right: 0; }
- 
+
     .wh-switch { text-align: center; font-size: 0.8rem; color: #54595d; }
     .wh-switch a { color: #0645ad; cursor: pointer; }
- 
+
     .wh-success { display: none; text-align: center; padding: 28px 20px; }
     .wh-success .wh-check { font-size: 2.8rem; margin-bottom: 8px; }
     .wh-success h3 { font-size: 1rem; margin-bottom: 5px; }
     .wh-success p  { font-size: 0.83rem; color: #54595d; margin-bottom: 14px; }
- 
+
     .wh-loggedin { display: none; padding: 22px 20px; text-align: center; }
     .wh-avatar {
       width: 52px; height: 52px; background: #0645ad; border-radius: 50%;
@@ -234,13 +234,13 @@
       transition: background 0.12s;
     }
     .wh-logout:hover { background: #eee; color: #000; }
- 
+
     .wh-foot {
       background: #f8f9fa; border-top: 1px solid #a2a9b1;
       padding: 7px 14px; font-size: 0.72rem; color: #54595d; text-align: center;
     }
     .wh-foot a { color: #0645ad; }
- 
+
     @keyframes wikiShake {
       0%,100% { transform: translateX(0); }
       20%      { transform: translateX(-6px); }
@@ -252,22 +252,22 @@
   </style>
 </head>
 <body>
- 
+
   <!-- ── Sidebar nav ──────────────────────────────────────────────────────── -->
   <nav class="sidebar">
     <h2>Sommaire</h2>
     <ul class="nav-list">
-      <li><button onclick="location.href='#section1'">Histoire générale</button></li>
-      <li><button onclick="location.href='#section2'">Les Grands Êtres</button></li>
-      <li><button onclick="location.href='#section3'">Specific 2</button></li>
+      <li><button type="button" onclick="location.href='#section1'">Histoire générale</button></li>
+      <li><button type="button" onclick="location.href='#section2'">Les Grands Êtres</button></li>
+      <li><button type="button" onclick="location.href='#section3'">Specific 2</button></li>
     </ul>
   </nav>
- 
+
   <!-- ── Main content ─────────────────────────────────────────────────────── -->
   <main class="main-content">
     <h1 style="font-size:50px;">Bloodborne</h1>
     <div style="height:10px;"></div>
- 
+
     <h2 id="section1">Histoire générale</h2>
     <p class="invisborder">
       Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
@@ -275,16 +275,16 @@
       Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
       Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
     </p>
- 
+
     <div style="height:600px;"></div>
     <h2 id="section2">Les Grands Êtres</h2>
     <p>Paragraphe relié aux Grands Êtres.</p>
- 
+
     <div style="height:600px;"></div>
     <h2 id="section3">Specific 2</h2>
     <p>Paragraphe relié au specific 2.</p>
   </main>
- 
+
   <!-- ── Infobox ──────────────────────────────────────────────────────────── -->
   <div class="infobox">
     <h3>Infos</h3>
@@ -294,19 +294,20 @@
     <p><strong>Développeur :</strong> FromSoftware</p>
     <p><strong>Directeur :</strong> Hidetaka Miyazaki</p>
   </div>
- 
+
   <!-- ── Auth button ──────────────────────────────────────────────────────── -->
-  <button id="wiki-auth-btn" onclick="wikiOpen()">
+  <button type="button" id="wiki-auth-btn" onclick="wikiOpen()">
     <svg viewBox="0 0 24 24">
       <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
     </svg>
     <span id="wiki-btn-txt">Créer un compte</span>
   </button>
- 
- 
+
+  <!-- ── Auth modal ───────────────────────────────────────────────────────── -->
   <div id="wiki-overlay" onclick="wikiOverlayClick(event)">
     <div id="wiki-modal">
- 
+
+      <!-- Header -->
       <div class="wh-head">
         <div class="wh-head-left">
           <svg class="wh-logo" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
@@ -322,18 +323,20 @@
             <div class="wh-subtitle">Créez votre compte gratuit</div>
           </div>
         </div>
-        <button class="wh-close" onclick="wikiClose()">✕</button>
+        <button type="button" class="wh-close" onclick="wikiClose()">✕</button>
       </div>
- 
+
+      <!-- Tabs -->
       <div class="wh-tabs" id="wiki-tabs">
-        <button class="wh-tab wh-active" id="wiki-tab-reg" onclick="wikiTab('reg')">S'inscrire</button>
-        <button class="wh-tab"           id="wiki-tab-log" onclick="wikiTab('log')">Se connecter</button>
+        <button type="button" class="wh-tab wh-active" id="wiki-tab-reg" onclick="wikiTab('reg')">S'inscrire</button>
+        <button type="button" class="wh-tab" id="wiki-tab-log" onclick="wikiTab('log')">Se connecter</button>
       </div>
- 
+
+      <!-- Registration panel -->
       <div id="wiki-panel-reg">
         <div class="wh-body">
           <div class="wh-alert wh-err" id="wa-reg"><span>⚠&nbsp;</span><span id="wa-reg-txt"></span></div>
- 
+
           <div class="wh-field">
             <label class="wh-label" for="wr-email">Adresse courriel</label>
             <input class="wh-input" type="email" id="wr-email" placeholder="nom@domaine.com"
@@ -341,14 +344,14 @@
               onblur="wvEmailBlur('wr-email','wm-email')">
             <div class="wh-msg" id="wm-email"></div>
           </div>
- 
+
           <div class="wh-field">
             <label class="wh-label" for="wr-email2">Confirmer le courriel</label>
             <input class="wh-input" type="email" id="wr-email2" placeholder="Répétez votre courriel"
               oninput="wvEmailMatch()" onblur="wvEmailMatch()">
             <div class="wh-msg" id="wm-email2"></div>
           </div>
- 
+
           <div class="wh-field">
             <label class="wh-label" for="wr-pw">Mot de passe</label>
             <input class="wh-input" type="password" id="wr-pw" placeholder="Minimum 8 caractères"
@@ -356,30 +359,31 @@
             <div class="wh-bar"><div class="wh-bar-fill" id="wstr-fill"></div></div>
             <div class="wh-str-lbl" id="wstr-lbl"></div>
           </div>
- 
+
           <div class="wh-field">
             <label class="wh-label" for="wr-pw2">Confirmer le mot de passe</label>
             <input class="wh-input" type="password" id="wr-pw2" placeholder="Répétez votre mot de passe"
               oninput="wvPwMatch()" onblur="wvPwMatch()">
             <div class="wh-msg" id="wm-pw2"></div>
           </div>
- 
-          <button class="wh-btn" onclick="wSubmitReg()">Créer votre compte</button>
+
+          <button type="button" class="wh-btn" onclick="wSubmitReg()">Créer votre compte</button>
           <div class="wh-div" style="margin-top:10px">ou</div>
           <div class="wh-switch">Déjà un compte ?&nbsp;<a onclick="wikiTab('log')">Connectez-vous</a></div>
         </div>
       </div>
- 
+
+      <!-- Login panel -->
       <div id="wiki-panel-log" style="display:none">
         <div class="wh-body">
           <div class="wh-alert wh-err" id="wa-log"><span>⚠&nbsp;</span><span id="wa-log-txt"></span></div>
- 
+
           <div class="wh-field">
             <label class="wh-label" for="wl-email">Adresse courriel</label>
             <input class="wh-input" type="email" id="wl-email" placeholder="nom@domaine.com"
               oninput="wClearAlert('wa-log')">
           </div>
- 
+
           <div class="wh-field">
             <label class="wh-label" for="wl-pw">Mot de passe</label>
             <input class="wh-input" type="password" id="wl-pw" placeholder="Votre mot de passe"
@@ -388,40 +392,40 @@
               <a href="#" style="color:#0645ad" onclick="return false">Mot de passe oublié ?</a>
             </div>
           </div>
- 
-          <button class="wh-btn" onclick="wSubmitLog()">Se connecter</button>
+
+          <button type="button" class="wh-btn" onclick="wSubmitLog()">Se connecter</button>
           <div class="wh-div" style="margin-top:10px">ou</div>
           <div class="wh-switch">Pas de compte ?&nbsp;<a onclick="wikiTab('reg')">Inscrivez-vous</a></div>
         </div>
       </div>
- 
-    
+
+      <!-- Success panel -->
       <div class="wh-success" id="wiki-success">
         <div class="wh-check">✅</div>
         <h3>Compte créé avec succès !</h3>
         <p>Vérifiez votre courriel si une confirmation est requise, puis connectez-vous.</p>
-        <button class="wh-btn" style="max-width:180px;margin:0 auto" onclick="wikiTab('log')">Se connecter</button>
+        <button type="button" class="wh-btn" style="max-width:180px;margin:0 auto" onclick="wikiTab('log')">Se connecter</button>
       </div>
- 
 
+      <!-- Logged-in panel -->
       <div class="wh-loggedin" id="wiki-loggedin">
         <div class="wh-avatar" id="wk-avatar">U</div>
         <h3 id="wk-greet">Bonjour !</h3>
         <div class="wh-email-lbl" id="wk-email"></div>
         <div class="wh-connected">✔ Connecté</div>
-        <button class="wh-logout" onclick="wLogout()">Se déconnecter</button>
+        <button type="button" class="wh-logout" onclick="wLogout()">Se déconnecter</button>
       </div>
- 
-    
+
+      <!-- Footer -->
       <div class="wh-foot">
         En vous inscrivant, vous acceptez nos <a href="#">Conditions</a> et notre <a href="#">Politique de confidentialité</a>.
       </div>
- 
-    </div>
-  </div>
- 
 
+    </div><!-- /wiki-modal -->
+  </div><!-- /wiki-overlay -->
+
+  <!-- main.js is an ES module — it imports Supabase directly, no global needed -->
   <script type="module" src="js/main.js"></script>
- 
+
 </body>
 </html>
