@@ -158,6 +158,14 @@
     .wh-tab.wh-active { color: #0645ad; border-bottom-color: #0645ad; background: #fff; font-weight: bold; }
     .wh-tab:hover:not(.wh-active) { background: #eaf3fb; color: #0645ad; }
 
+    /* Hard reset: stop external CSS bleeding into modal buttons */
+    #wiki-modal button {
+      all: unset;
+      box-sizing: border-box;
+      cursor: pointer;
+      font-family: 'Linux Libertine', Georgia, 'Times New Roman', serif;
+    }
+
     .wh-body { padding: 18px 20px 16px; }
     .wh-field { margin-bottom: 13px; }
     .wh-label { display: block; font-size: 0.82rem; font-weight: bold; color: #202122; margin-bottom: 4px; }
