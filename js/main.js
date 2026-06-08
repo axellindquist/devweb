@@ -1,6 +1,6 @@
-   (function () {
- 
-  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+(function () {
 
 const SUPABASE_URL = "https://dtwlzarqmeaxyjdiipdr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0d2x6YXJxbWVheHlqZGlpcGRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0NjM1OTYsImV4cCI6MjA5MzAzOTU5Nn0.YgOTZqut_2lXjTjXSnUn4rWRR7EmXf1aPcXEZxyDNwE";
