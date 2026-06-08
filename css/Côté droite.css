@@ -1,6 +1,5 @@
 
-    <body>
-     {
+    body {
         font-family: Arial, sans-serif;
         line-height: 1.5;
         margin: 0;
@@ -41,5 +40,5 @@
         width: 100%;
         display: block;
         border-bottom: 1px solid #a2a9b1;
-    }
-    <body>
+    } body
+
